@@ -15,18 +15,32 @@
 using namespace std; 
 
 
+
 typedef struct Tree{
     int age=1; 
 }Tree;
+
+struct compare{
+    bool operator()(Tree * a, Tree * b)
+    {
+        return a->age > b->age; 
+    }
+};
+
+
 typedef struct Node{
     int nutrnt=5;
-    vector <Tree*> trees; 
+    // vector <Tree*> trees; 
+    priority_queue<Tree*, vector<Tree*>, compare> trees; 
 }Node; 
 
+
+/*
 bool compare(Tree *a, Tree *b)
 {
     return a->age < b->age; 
 }
+*/
 
 
 void solve()
@@ -50,7 +64,8 @@ void solve()
         cin >> x >> y >> age;
         Tree *tree = new Tree; 
         tree->age = age; 
-        nodes[x][y].trees.push_back(tree); 
+        // nodes[x][y].trees.push_back(tree); 
+        nodes[x][y].trees.push(tree); 
     }
 
     while(K--)
@@ -62,14 +77,35 @@ void solve()
             {
                 // 봄
                 Node * node = &nodes[i][j];
-                sort(node->trees.begin(), node->trees.end(), compare) ;
-                int dead_tree_nutrnt = 0; 
-                int idx = 0; 
-                vector <int> dead_trees; 
-                // cout << "here";
+                // sort(node->trees.begin(), node->trees.end(), compare) ;
+                int dead_tree_nutrnt = 0, dead_tree_cnt = 0; 
+                vector <Tree*> tempTrees; 
+                while (!node->trees.empty() && node->nutrnt >= node->trees.top()->age)
+                {
+                    Tree * tree = node->trees.top(); 
+                    node->trees.pop(); 
+                    node->nutrnt -= tree->age; 
+                    tree->age += 1; 
+                    tempTrees.push_back(tree); 
+                }
+                while(!node->trees.empty())
+                {
+                    dead_tree_cnt += 1; 
+                    dead_tree_nutrnt += node->trees.top()->age / 2; 
+                    node->trees.pop(); 
+                }
+                // cout << "A"; 
+                for(Tree* tree:tempTrees)
+                {
+                    node->trees.push(tree); 
+                }
+                // cout << "B"; 
+                // tempTrees.erase(); 
+                node->nutrnt += dead_tree_nutrnt; 
+            
+
+                /*
                 for(Tree* tree: nodes[i][j].trees)
-                // int numTree = nodes->trees.size(); 
-                // FOR3(numTree)
                 {
                     // cout << tree->age << '\n'; 
                     if (node->nutrnt >= tree->age)
@@ -78,17 +114,22 @@ void solve()
                         tree->age += 1;          
                     } 
                     else{
-                        dead_trees.push_back(idx); 
+                        dead_tree_cnt += 1; 
+                        // dead_trees.push_back(idx); 
                         dead_tree_nutrnt += tree->age/2; 
                     }
                     idx += 1; 
                 }
                 // 여름
-                for(int k = dead_trees.size()-1; k >=0; k-=1)
+                // 시간초과 의심 지점
+                for(int k = 0; k < dead_tree_cnt; k++)
+                // for(int k = dead_trees.size()-1; k >=0; k-=1)
                 {
-                    node->trees.erase(node->trees.begin() + dead_trees[k]); 
+                    node->trees.pop_back(); 
+                    // node->trees.erase(node->trees.begin() + dead_trees[k]); 
                 }
                 node->nutrnt += dead_tree_nutrnt; 
+                */
             }
         }
         // 가을
@@ -99,24 +140,39 @@ void solve()
             FOR2(N)
             {
                 Node * node = &nodes[i][j]; 
-                for (Tree * tree: node->trees)
+                // for (Tree * tree: node->trees)
+                vector <Tree *> tempTrees; 
+                while(!node->trees.empty())
                 {
+                    Tree * tree = node->trees.top();
+                    tempTrees.push_back(tree);
+                    node->trees.pop();
                     if (tree->age % 5 == 0)
                     {
                         for(int k = 0; k < 8; k++)
                         {
                             int ni = i + di[k]; 
                             int nj = j + dj[k]; 
-                            if (ni >= 0 && ni < N && nj >= 0 && nj < N)
+                            if (ni >= 1 && ni <= N && nj >= 1 && nj <= N)
                             {
                                 Tree *new_tree = new Tree; 
-                                nodes[ni][nj].trees.push_back(new_tree);        
+                                nodes[ni][nj].trees.push(new_tree);        
                             }
                         }                    
                     }
+                    // cout << "asdf"; 
+                }
+                static int idx = 0; 
+                // cout << "hehllo " << idx << '\n'; 
+                idx ++ ;
+
+                for (Tree * tree: tempTrees)
+                {
+                    node->trees.push(tree); 
                 }
             }
         }
+        // cout << "hehllo"; 
         //겨울 
         FOR(N)
         {
@@ -136,7 +192,6 @@ void solve()
         }
     }
     cout << ans; 
-
     return; 
 }
 
