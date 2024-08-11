@@ -15,10 +15,20 @@
 using namespace std; 
 
 
+
 typedef struct Tree{
     int age=1; 
     bool bornThisYear = true; 
 }Tree;
+
+struct compare{
+    bool operator()(Tree * a, Tree * b)
+    {
+        return a->age > b->age; 
+    }
+};
+
+
 typedef struct Node{
     int nutrnt=5;
     // vector <Tree*> trees; 
@@ -26,10 +36,13 @@ typedef struct Node{
     int treeCnt = 0; 
 }Node; 
 
+
+/*
 bool compare(Tree *a, Tree *b)
 {
     return a->age > b->age; 
 }
+*/
 
 void solve()
 {
@@ -152,7 +165,8 @@ void solve()
                         tree->age += 1;          
                     } 
                     else{
-                        dead_trees.push_back(idx); 
+                        dead_tree_cnt += 1; 
+                        // dead_trees.push_back(idx); 
                         dead_tree_nutrnt += tree->age/2; 
                     }
                     idx += 1; 
@@ -181,7 +195,6 @@ void solve()
         }
     }
     cout << ans; 
-
     return; 
 }
 
